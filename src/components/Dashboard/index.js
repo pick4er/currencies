@@ -23,7 +23,7 @@ function Dashboard(props) {
 }
 
 Dashboard.propTypes = {
-  mode: T.oneOf(Object.keys(Modes)),
+  mode: T.oneOf(Object.keys(Modes)).isRequired,
 }
 
 const mapStateToProps = state => ({

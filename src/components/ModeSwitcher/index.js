@@ -38,8 +38,8 @@ function ModeSwitcher(props) {
 }
 
 ModeSwitcher.propTypes = {
-  setMode: T.func,
-  mode: T.oneOf(Object.keys(Modes)),
+  setMode: T.func.isRequired,
+  mode: T.oneOf(Object.keys(Modes)).isRequired,
 }
 
 const mapStateToProps = state => ({

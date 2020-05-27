@@ -7,7 +7,7 @@ const SET_RATE = 'CURRENCIES/SET_RATE';
 
 const initialState = {
   base: 'rub',
-  currencies: new Set(['usd', 'eur']),
+  currencies: ['usd', 'eur'],
   rates: undefined
 }
 
