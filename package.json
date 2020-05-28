@@ -30,7 +30,7 @@
     "clear": "rm -rf ./build/* && rm -rf ./lib/*",
     "build-server": "babel server -d lib",
     "start-server": "node ./lib/index.js",
-    "server": "yarn clear && yarn build-server && yarn start-server"
+    "serve": "yarn clear && yarn build-server && yarn start-server"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -8,6 +8,7 @@ import assets from './routes/assets';
 
 import helmet from './handlers/helmet';
 import errors from './handlers/errors';
+import rates from './handlers/rates';
 import logger from './handlers/logger';
 import statics from './handlers/statics';
 import filename from './handlers/filename';
@@ -18,6 +19,7 @@ const router = new Router();
 
 app.use(helmet);
 app.use(errors);
+app.use(rates);
 app.use(logger);
 app.use(statics);
 app.use(favicon);
