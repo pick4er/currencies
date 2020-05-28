@@ -4,7 +4,7 @@ function getLatest(ctx) {
 
   ctx.set({ 'Content-Type': 'application/json' })
   ctx.body = {
-    rate: ctx.rates[currency.toLowerCase()],
+    value: ctx.rates[currency.toLowerCase()],
     last_changed: ctx.last_changed
   }
   ctx.status = 200

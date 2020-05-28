@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import {
   selectCurrencies,
   selectBaseCurrency,
-  selectRatesByTimestamp,
+  selectRatesByTime,
 } from 'flux/modules/currencies';
 import { createCurrencyPair } from 'helpers';
 
@@ -30,12 +30,12 @@ function Table(props) {
         </tr>
       </thead>
       <tbody>
-        {rates.map(({ timestamp, ...prices }) => (
-          <tr key={timestamp}>
-            <td>{ timestamp }</td>
+        {rates.map(({ time, ...prices }) => (
+          <tr key={time}>
+            <td>{ time }</td>
 
             {currencies.map(currency => (
-              <td key={timestamp + currency}>
+              <td key={time + currency}>
                 { prices[currency] }
               </td>
             ))}
@@ -48,7 +48,7 @@ function Table(props) {
 
 Table.propTypes = {
   rates: T.arrayOf(T.shape({
-    timestamp: T.string.isRequired,
+    time: T.string.isRequired,
     // currencies: string
   })),
   currencies: T.arrayOf(T.string).isRequired,
@@ -56,7 +56,7 @@ Table.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  rates: selectRatesByTimestamp(state),
+  rates: selectRatesByTime(state),
   currencies: selectCurrencies(state),
   base: selectBaseCurrency(state)
 })

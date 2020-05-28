@@ -61,36 +61,54 @@ export const selectBaseCurrency = createSelector(
 
 export const selectRatesByCurrencies = createSelector(
   selectCurrenciesModule,
-  ({ rates }) => rates,
-)
-
-export const selectRatesByTimestamp = createSelector(
-  selectRatesByCurrencies,
-  ratesByCurrencies => {
-    let ratesByTimestamp = []
+  ({ rates }) => {
+    const ratesWithUnixTime = new Map()
     for (
       const [
         currency,
-        value,
-      ] of ratesByCurrencies.entries()
+        values,
+      ] of rates.entries()
     ) {
-      if (ratesByTimestamp.length === 0) {
-        ratesByTimestamp = ratesByTimestamp.concat(value)
+      const valuesWithUnixTime = values.map(
+        ({ time, ...rest }) => ({
+          ...rest,
+          time: dayjs(time, TIME_FORMAT).unix(),
+        })
+      )
+      ratesWithUnixTime.set(currency, valuesWithUnixTime)
+    }
+
+    return ratesWithUnixTime
+  },
+)
+
+export const selectRatesByTime = createSelector(
+  selectCurrenciesModule,
+  ({ rates }) => {
+    let ratesByTime = []
+    for (
+      const [
+        currency,
+        values,
+      ] of rates.entries()
+    ) {
+      if (ratesByTime.length === 0) {
+        ratesByTime = ratesByTime.concat(values)
       }
 
-      ratesByTimestamp.forEach((dayRate, index) => {
-        if (value[index].timestamp !== dayRate.timestamp) {
+      ratesByTime.forEach((dayRate, index) => {
+        if (values[index].time !== dayRate.time) {
           throw new TypeError(
             'Rates arrays must be \
-            sorted and equal by timestamp'
+            sorted and equal by time'
           )
         }
 
-        dayRate[currency] = value[index].rate
+        dayRate[currency] = values[index].value
       })
     }
 
-    return ratesByTimestamp
+    return ratesByTime
   },
 )
 
