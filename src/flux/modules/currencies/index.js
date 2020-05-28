@@ -10,7 +10,9 @@ import {
 
 const Periods = {
   day: '1d',
-  hour: '1h'
+  hour: '1h',
+  minute: '1m',
+  fiveMinutes: '5m',
 }
 
 // Actions
@@ -115,14 +117,14 @@ async (dispatch, getState) => {
   const base = selectBaseCurrency(getState())
   const currencies = selectCurrencies(getState())
   const rates = new Map()
-  const timeFrom = dayjs('2020-05-20').format('YYYY-MM-DDTHH:mm:ss')
+  const timeFrom = dayjs('2020-05-27').format('YYYY-MM-DDTHH:mm:ss')
   const timeTo = dayjs().format('YYYY-MM-DDTHH:mm:ss')
 
   await Promise.all(
     currencies.map(async currency => {
       const result = await getHistoryRates({
         symbol: createCurrencyPair(currency, base),
-        period: Periods.hour,
+        period: Periods.fiveMinutes,
         from: timeFrom,
         to: timeTo,
       })
