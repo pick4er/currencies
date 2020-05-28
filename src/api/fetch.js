@@ -1,7 +1,7 @@
 import qs from 'query-string';
 
 const BACKEND_URL = process.env.NODE_ENV === 'production'
-  ? ''
+  ? 'https://rub-converter.herokuapp.com'
   : 'http://localhost:8080'
 
 export function getFullUrl(url, isFullUrl, query = {}) {

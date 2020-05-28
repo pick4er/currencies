@@ -29,10 +29,11 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "clear": "rm -rf ./build/* && rm -rf ./lib/*",
+    "clear": "rm -rf ./lib/*",
     "build-server": "babel server -d lib",
     "start-server": "node ./lib/index.js",
-    "serve": "yarn clear && yarn build-server && yarn start-server"
+    "serve": "yarn clear && yarn build-server && yarn start-server",
+    "heroku-postbuild": "yarn build-server && yarn build"
   },
   "eslintConfig": {
     "extends": "react-app"
