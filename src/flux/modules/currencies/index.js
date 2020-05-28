@@ -3,7 +3,10 @@ import { createSelector } from 'reselect';
 import { getHistoryRates } from 'api';
 
 import { notify } from 'flux/modules/notifications';
-import { createCurrencyPair } from 'helpers';
+import {
+  TIME_FORMAT,
+  createCurrencyPair,
+} from 'helpers';
 
 const Periods = {
   day: '1d',
@@ -20,7 +23,7 @@ const SET_RATES = 'CURRENCIES/SET_RATES';
 const initialState = {
   base: 'RUB',
   currencies: ['USD', 'EUR'],
-  rates: undefined,
+  rates: new Map(),
 }
 
 export default function reducer(
@@ -58,14 +61,36 @@ export const selectBaseCurrency = createSelector(
 
 export const selectRatesByCurrencies = createSelector(
   selectCurrenciesModule,
-  ({ rates }) => rates || [],
+  ({ rates }) => rates,
 )
 
 export const selectRatesByTimestamp = createSelector(
-  selectCurrenciesModule,
-  ({ rates }) => {
-    // TODO: create new list of objects (map), separated by timestamp
-    return []
+  selectRatesByCurrencies,
+  ratesByCurrencies => {
+    let ratesByTimestamp = []
+    for (
+      const [
+        currency,
+        value,
+      ] of ratesByCurrencies.entries()
+    ) {
+      if (ratesByTimestamp.length === 0) {
+        ratesByTimestamp = ratesByTimestamp.concat(value)
+      }
+
+      ratesByTimestamp.forEach((dayRate, index) => {
+        if (value[index].timestamp !== dayRate.timestamp) {
+          throw new TypeError(
+            'Rates arrays must be \
+            sorted and equal by timestamp'
+          )
+        }
+
+        dayRate[currency] = value[index].rate
+      })
+    }
+
+    return ratesByTimestamp
   },
 )
 
@@ -97,7 +122,7 @@ export const setCurrencies = payload => ({
   payload
 })
 
-export const setRate = payload => ({
+export const setRates = payload => ({
   type: SET_RATES,
   payload
 })
@@ -108,8 +133,9 @@ async (dispatch, getState) => {
   const base = selectBaseCurrency(getState())
   const currencies = selectCurrencies(getState())
   const rates = new Map()
-  const timeFrom = dayjs('2020-05-27').format('YYYY-MM-DDTHH:mm')
-  const timeTo = dayjs().format('YYYY-MM-DDTHH:mm')
+  const timeTo = dayjs().format(TIME_FORMAT)
+  const timeFrom =
+    dayjs().subtract(1, 'day').format(TIME_FORMAT)
 
   await Promise.all(
     currencies.map(async currency => {
@@ -124,4 +150,6 @@ async (dispatch, getState) => {
       rates.set(currency, result)
     })
   )
+  
+  dispatch(setRates(rates))
 }
