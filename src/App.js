@@ -1,7 +1,4 @@
 import React from 'react';
+import Dashboard from 'components/Dashboard';
 
-function App() {
-  return <div>Hello, forex!</div>;
-}
-
-export default App;
+export default () => <Dashboard />;
