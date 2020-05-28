@@ -117,8 +117,8 @@ async (dispatch, getState) => {
   const base = selectBaseCurrency(getState())
   const currencies = selectCurrencies(getState())
   const rates = new Map()
-  const timeFrom = dayjs('2020-05-27').format('YYYY-MM-DDTHH:mm:ss')
-  const timeTo = dayjs().format('YYYY-MM-DDTHH:mm:ss')
+  const timeFrom = dayjs('2020-05-27').format('YYYY-MM-DDTHH:mm')
+  const timeTo = dayjs().format('YYYY-MM-DDTHH:mm')
 
   await Promise.all(
     currencies.map(async currency => {
