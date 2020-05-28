@@ -3,24 +3,24 @@ import T from 'prop-types';
 import { connect } from 'react-redux';
 
 import {
-  selectRates,
   selectCurrencies,
   selectBaseCurrency,
+  selectRatesByTimestamp,
 } from 'flux/modules/currencies';
 import { createCurrencyPair } from 'helpers';
 
 function Table(props) {
   const {
+    base,
     rates,
     currencies,
-    baseCurrency,
   } = props
 
   return (
     <table>
       <thead>
         <tr>
-          <td>Time (UTC+3)</td>
+          <td>Time (UTC+0)</td>
 
           {currencies.map(currency => (
             <td key={currency}>
@@ -55,13 +55,13 @@ Table.propTypes = {
     entries: T.func.isRequired,
     values: T.func.isRequired,
   }).isRequired,
-  baseCurrency: T.string.isRequired,
+  base: T.string.isRequired,
 }
 
 const mapStateToProps = state => ({
-  rates: selectRates(state),
+  rates: selectRatesByTimestamp(state),
   currencies: selectCurrencies(state),
-  baseCurrency: selectBaseCurrency(state)
+  base: selectBaseCurrency(state)
 })
 
-export default Table;
+export default connect(mapStateToProps)(Table);

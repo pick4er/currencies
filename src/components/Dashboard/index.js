@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import T from 'prop-types';
 import { connect } from 'react-redux';
 
@@ -7,11 +7,18 @@ import Chart from 'components/Chart';
 import ModeSwitcher from 'components/ModeSwitcher';
 
 import { Modes, selectMode } from 'flux/modules/dashboard';
+import {
+  initDashboard as initDashboardAction
+} from 'flux/modules/currencies';
 
 import css from './index.module.scss';
 
 function Dashboard(props) {
-  const { mode } = props
+  const { mode, initDashboard } = props
+
+  useEffect(() => {
+    initDashboard()
+  }, [initDashboard])
 
   return (
     <div>
@@ -24,13 +31,17 @@ function Dashboard(props) {
 
 Dashboard.propTypes = {
   mode: T.oneOf(Object.keys(Modes)).isRequired,
+  initDashboard: T.func.isRequired,
 }
 
+const mapDispatchToProps = {
+  initDashboard: initDashboardAction
+}
 const mapStateToProps = state => ({
   mode: selectMode(state),
 })
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Dashboard);

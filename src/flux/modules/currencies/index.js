@@ -1,14 +1,23 @@
+import dayjs from 'dayjs';
 import { createSelector } from 'reselect';
+import { getHistoryRates } from 'api';
+
+import { createCurrencyPair } from 'helpers';
+
+const Periods = {
+  day: '1d',
+  hour: '1h'
+}
 
 // Actions
 const SET_BASE = 'CURRENCIES/SET_BASE';
 const SET_CURRENCIES = 'CURRENCIES/SET_CURRENCIES';
-const SET_RATE = 'CURRENCIES/SET_RATE';
+const SET_RATES = 'CURRENCIES/SET_RATES';
 
 const initialState = {
-  base: 'rub',
-  currencies: ['usd', 'eur'],
-  rates: undefined
+  base: undefined,
+  currencies: undefined,
+  rates: undefined,
 }
 
 export default function reducer(
@@ -26,7 +35,7 @@ export default function reducer(
         ...state,
         currencies: payload
       }
-    case SET_RATE:
+    case SET_RATES:
       return {
         ...state,
         rates: payload
@@ -44,14 +53,34 @@ export const selectBaseCurrency = createSelector(
   ({ base }) => base
 )
 
-export const selectRates = createSelector(
+export const selectRatesByCurrencies = createSelector(
   selectCurrenciesModule,
-  ({ rates }) => rates,
+  ({ rates }) => rates || [],
+)
+
+export const selectRatesByTimestamp = createSelector(
+  selectCurrenciesModule,
+  ({ rates }) => {
+    // TODO: create new list of objects (map), separated by timestamp
+    return []
+  },
 )
 
 export const selectCurrencies = createSelector(
   selectCurrenciesModule,
-  ({ currencies }) => currencies
+  ({ currencies }) => currencies || []
+)
+
+export const selectCurrencyPairs = createSelector(
+  selectBaseCurrency,
+  selectCurrencies,
+  (base, currencies) => currencies.reduce(
+    (acc, curr) => 
+      acc
+        ? `${acc},`
+        : acc
+      + createCurrencyPair(base, curr), ''
+  )
 )
 
 // Action creators
@@ -66,7 +95,35 @@ export const setCurrencies = payload => ({
 })
 
 export const setRate = payload => ({
-  type: SET_RATE,
+  type: SET_RATES,
   payload
 })
 
+// Middleware
+export const initDashboard = () => dispatch => {
+  dispatch(setBaseCurrency('RUB'))
+  dispatch(setCurrencies(['USD', 'EUR']))
+  dispatch(initRates())
+}
+
+export const initRates = () =>
+async (dispatch, getState) => {
+  const base = selectBaseCurrency(getState())
+  const currencies = selectCurrencies(getState())
+  const rates = new Map()
+  const timeFrom = dayjs('2020-05-20').format('YYYY-MM-DDTHH:mm:ss')
+  const timeTo = dayjs().format('YYYY-MM-DDTHH:mm:ss')
+
+  const values = await Promise.all(
+    currencies.map(async currency => {
+      const result = await getHistoryRates({
+        symbol: createCurrencyPair(currency, base),
+        period: Periods.hour,
+        from: timeFrom,
+        to: timeTo,
+      })
+
+      rates.set(currency, result)
+    })
+  )
+}
