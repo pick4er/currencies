@@ -1,7 +1,10 @@
 import createCurrencyPair from './createCurrencyPair';
-import sanitizeHistoryData from './sanitizeHistoryData';
+import convertPeriodToSeconds from './convertPeriodToSeconds';
+
+export const TIME_FORMAT = 'YYYY-MM-DDTHH:mm';
+export const CHART_TIME_FORMAT = 'DD.MM.YY HH:mm';
 
 export {
   createCurrencyPair,
-  sanitizeHistoryData
+  convertPeriodToSeconds,
 }

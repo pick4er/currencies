@@ -1,25 +1,20 @@
 import qs from 'query-string';
 
-// since api not valuable, it's ok to keep the key in front
-const ACCESS_KEY =
-  'ldczUJcFBZ016WYxGjPYmMjy00qFHYpyQmVvEphakS8jGn5yEj';
-const BACKEND_URL = 'https://fcsapi.com/api-v2/forex';
+const BACKEND_URL = process.env.NODE_ENV === 'production'
+  ? ''
+  : 'http://localhost:8080'
 
 export function getFullUrl(url, isFullUrl, query = {}) {
   const fullUrl = isFullUrl ? url : `${BACKEND_URL}/${url}`;
   const queryString = typeof query === 'string'
     ? query
-    : qs.stringify({
-        ...query,
-        access_key: ACCESS_KEY
-      })
+    : qs.stringify({ ...query })
 
   return fullUrl + `?${queryString}`
 }
 
 function getOptions() {
   return {
-    mode: 'cors',
     method: 'GET',
   };
 }

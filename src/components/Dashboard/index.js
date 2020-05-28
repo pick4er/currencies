@@ -8,17 +8,23 @@ import ModeSwitcher from 'components/ModeSwitcher';
 
 import { Modes, selectMode } from 'flux/modules/dashboard';
 import {
-  initDashboard as initDashboardAction
+  initRates as initRatesAction,
+  pingRates as pingRatesAction
 } from 'flux/modules/currencies';
 
 import css from './index.module.scss';
 
 function Dashboard(props) {
-  const { mode, initDashboard } = props
+  const {
+    mode,
+    initRates,
+    pingRates,
+  } = props
 
   useEffect(() => {
-    initDashboard()
-  }, [initDashboard])
+    initRates()
+    pingRates()
+  }, [initRates, pingRates])
 
   return (
     <div>
@@ -30,12 +36,14 @@ function Dashboard(props) {
 }
 
 Dashboard.propTypes = {
-  mode: T.oneOf(Object.keys(Modes)).isRequired,
-  initDashboard: T.func.isRequired,
+  mode: T.oneOf(Object.values(Modes)).isRequired,
+  initRates: T.func.isRequired,
+  pingRates: T.func.isRequired,
 }
 
 const mapDispatchToProps = {
-  initDashboard: initDashboardAction
+  initRates: initRatesAction,
+  pingRates: pingRatesAction
 }
 const mapStateToProps = state => ({
   mode: selectMode(state),

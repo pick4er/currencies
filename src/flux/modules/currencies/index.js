@@ -1,29 +1,44 @@
 import dayjs from 'dayjs';
 import { createSelector } from 'reselect';
-import { getHistoryRates } from 'api';
+import {
+  getLatestRates,
+  getHistoryRates,
+} from 'api';
 
 import { notify } from 'flux/modules/notifications';
 import {
+  TIME_FORMAT,
   createCurrencyPair,
-  sanitizeHistoryData,
+  convertPeriodToSeconds,
 } from 'helpers';
 
-const Periods = {
+export const Periods = {
   day: '1d',
   hour: '1h',
   minute: '1m',
   fiveMinutes: '5m',
 }
 
+export const Colors = {
+  usd: '#005A9E',
+  eur: '#FFB347',
+}
+
+const SERVER_UPDATES_PERIOD = Periods.minute
+
 // Actions
 const SET_BASE = 'CURRENCIES/SET_BASE';
 const SET_CURRENCIES = 'CURRENCIES/SET_CURRENCIES';
 const SET_RATES = 'CURRENCIES/SET_RATES';
+const SET_TIMER_ID = 'CURRENCIES/SET_TIMER_ID';
+const SET_PERIOD = 'CURRENCIES/SET_PERIOD';
 
 const initialState = {
-  base: undefined,
-  currencies: undefined,
-  rates: undefined,
+  base: 'RUB',
+  currencies: ['USD', 'EUR'],
+  rates: new Map(),
+  period: Periods.fiveMinutes,
+  timerId: undefined,
 }
 
 export default function reducer(
@@ -36,6 +51,11 @@ export default function reducer(
         ...state,
         base: payload
       };
+    case SET_PERIOD:
+      return {
+        ...state,
+        period: payload,
+      }
     case SET_CURRENCIES:
       return {
         ...state,
@@ -45,6 +65,11 @@ export default function reducer(
       return {
         ...state,
         rates: payload
+      }
+    case SET_TIMER_ID:
+      return {
+        ...state,
+        timerId: payload
       }
     default:
       return state
@@ -59,16 +84,71 @@ export const selectBaseCurrency = createSelector(
   ({ base }) => base
 )
 
-export const selectRatesByCurrencies = createSelector(
+export const selectTimerId = createSelector(
   selectCurrenciesModule,
-  ({ rates }) => rates || [],
+  ({ timerId }) => timerId,
 )
 
-export const selectRatesByTimestamp = createSelector(
+export const selectRates = createSelector(
   selectCurrenciesModule,
-  ({ rates }) => {
-    // TODO: create new list of objects (map), separated by timestamp
-    return []
+  ({ rates }) => rates
+)
+
+export const selectPeriod = createSelector(
+  selectCurrenciesModule,
+  ({ period }) => period
+)
+
+export const selectRatesByCurrencies = createSelector(
+  selectRates,
+  rates => {
+    const ratesWithUnixTime = new Map()
+    for (
+      const [
+        currency,
+        values,
+      ] of rates.entries()
+    ) {
+      const valuesWithUnixTime = values.map(
+        ({ time, ...rest }) => ({
+          ...rest,
+          time: dayjs(time, TIME_FORMAT).unix(),
+        })
+      )
+      ratesWithUnixTime.set(currency, valuesWithUnixTime)
+    }
+
+    return ratesWithUnixTime
+  },
+)
+
+export const selectRatesByTime = createSelector(
+  selectRates,
+  rates => {
+    let ratesByTime = []
+    for (
+      const [
+        currency,
+        values,
+      ] of rates.entries()
+    ) {
+      if (ratesByTime.length === 0) {
+        ratesByTime = ratesByTime.concat(values)
+      }
+
+      ratesByTime.forEach((dayRate, index) => {
+        if (values[index].time !== dayRate.time) {
+          throw new TypeError(
+            'Rates arrays must be \
+            sorted and equal by time'
+          )
+        }
+
+        dayRate[currency] = values[index].value
+      })
+    }
+
+    return ratesByTime.reverse()
   },
 )
 
@@ -100,43 +180,111 @@ export const setCurrencies = payload => ({
   payload
 })
 
-export const setRate = payload => ({
+export const setRates = payload => ({
   type: SET_RATES,
   payload
 })
 
-// Middleware
-export const initDashboard = () => dispatch => {
-  dispatch(setBaseCurrency('RUB'))
-  dispatch(setCurrencies(['USD', 'EUR']))
-  dispatch(initRates())
-}
+export const setTimerId = payload => ({
+  type: SET_TIMER_ID,
+  payload,
+})
 
+export const setPeriod = payload => ({
+  type: SET_PERIOD,
+  payload,
+})
+
+// Middleware
 export const initRates = () =>
 async (dispatch, getState) => {
   const base = selectBaseCurrency(getState())
+  const period = selectPeriod(getState())
   const currencies = selectCurrencies(getState())
   const rates = new Map()
-  const timeFrom = dayjs('2020-05-27').format('YYYY-MM-DDTHH:mm')
-  const timeTo = dayjs().format('YYYY-MM-DDTHH:mm')
+  const timeTo = dayjs().format(TIME_FORMAT)
+  const timeFrom =
+    dayjs().subtract(1, 'day').format(TIME_FORMAT)
 
   await Promise.all(
     currencies.map(async currency => {
       const result = await getHistoryRates({
-        symbol: createCurrencyPair(currency, base),
-        period: Periods.fiveMinutes,
-        from: timeFrom,
+        base,
+        period,
+        currency,
         to: timeTo,
+        from: timeFrom,
       })
 
-      if (result?.code !== '200') {
-        dispatch(notify(result.code))
-      } else {
-        rates.set(
-          currency,
-          sanitizeHistoryData(result.response)
-        )
-      }
+      rates.set(currency, result)
     })
   )
+  
+  dispatch(setRates(rates))
+}
+
+export const pingRates = () => (dispatch, getState) => {
+  const base = selectBaseCurrency(getState())
+  const currencies = selectCurrencies(getState())
+
+  setTimeout(async function ping() {
+    const nextRates = new Map()
+    let lastServerUpdate = undefined
+    const ratesUpdate = {}
+
+    await Promise.all(
+      currencies.map(async currency => {
+        const result = await getLatestRates({
+          base,
+          currency,
+        })
+
+        lastServerUpdate = result.last_changed
+        ratesUpdate[currency] = result
+      })
+    )
+
+    const rates = selectRates(getState())
+    for (
+      const [
+        currency,
+        values,
+      ] of rates.entries()
+    ) {
+      const nextRate = ratesUpdate[currency]
+      const nextValues = JSON.parse(JSON.stringify(values))
+      nextValues.push({
+        time: nextRate.last_changed,
+        value: nextRate.value
+      })
+
+      nextRates.set(currency, nextValues)
+    }
+
+    dispatch(setRates(nextRates))
+
+    const currentTimerId = selectTimerId(getState())
+    const period = selectPeriod(getState())
+
+    console.log(`--> [${currentTimerId}] lastServerUpdate: ${lastServerUpdate}`)
+    let nextTimeout = convertPeriodToSeconds('1m') * 1000
+    if (typeof currentTimer === 'undefined') {
+      // sync with most recent server updates
+      const lastServerUpdateInMsc = dayjs(
+        lastServerUpdate, TIME_FORMAT
+      ).unix() * 1000
+      const nextServerUpdateInMsc = dayjs(
+        lastServerUpdate, TIME_FORMAT
+      ).add(
+        convertPeriodToSeconds(SERVER_UPDATES_PERIOD), 's'
+      ).unix() * 1000
+
+      console.log(`--> [${currentTimerId}] lastServerUpdateInMsc: ${lastServerUpdateInMsc}`)
+      console.log(`--> [${currentTimerId}] nextServerUpdateInMsc: ${nextServerUpdateInMsc}`)
+      nextTimeout = nextServerUpdateInMsc - lastServerUpdateInMsc
+    }
+
+    console.log(`--> [${currentTimerId}] nextTimeout: ${nextTimeout}`)
+    dispatch(setTimerId(setTimeout(ping, nextTimeout)))
+  }, 0)
 }

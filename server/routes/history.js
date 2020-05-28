@@ -16,7 +16,9 @@ function getHistory(ctx) {
 
   const fromUnix = getUnix(fromTime)
   const toUnix = getUnix(toTime)
-  const secondsInPeriod = convertPeriodToSeconds(period)
+  const secondsInPeriod = convertPeriodToSeconds(
+    period.toLowerCase()
+  )
   const periodsAmount = parseInt(
     (toUnix - fromUnix) / secondsInPeriod,
     10
@@ -32,15 +34,12 @@ function getHistory(ctx) {
   const rates = []
   for (let i = 1; i <= periodsAmount; i++) {
     const unixTimestamp = fromUnix + (secondsInPeriod * i)
-    const timestamp = dayjs
+    const time = dayjs
       .unix(unixTimestamp)
       .format(TIME_FORMAT)
-    const rate = getRandomRate(currency.toLowerCase())
+    const value = getRandomRate(currency.toLowerCase())
 
-    rates.push({
-      timestamp,
-      rate
-    })
+    rates.push({ time, value })
   }
 
   ctx.set({ 'Content-Type': 'application/json' })

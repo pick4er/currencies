@@ -11,6 +11,7 @@
     "koa-logger": "^3.2.1",
     "koa-router": "^8.0.8",
     "koa-static": "^5.0.0",
+    "lightweight-charts": "^2.0.0",
     "mime": "^2.4.6",
     "prop-types": "^15.7.2",
     "query-string": "^6.12.1",
