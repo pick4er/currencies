@@ -1,0 +1,31 @@
+
+.table {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.header {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.row {
+  display: flex;
+  flex-flow: row nowrap;
+
+  div {
+    flex-grow: 1;
+    text-align: right;
+    width: 100px;
+    max-width: 100px;
+    min-width: 100px;
+  }
+
+  div:first-child {
+    flex-grow: 3;
+    width: 200px;
+    max-width: 200px;
+    min-width: 200px;
+    text-align: left;
+  }
+}

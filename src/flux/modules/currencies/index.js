@@ -5,7 +5,6 @@ import {
   getHistoryRates,
 } from 'api';
 
-import { notify } from 'flux/modules/notifications';
 import {
   TIME_FORMAT,
   createCurrencyPair,
@@ -138,10 +137,7 @@ export const selectRatesByTime = createSelector(
 
       ratesByTime.forEach((dayRate, index) => {
         if (values[index].time !== dayRate.time) {
-          throw new TypeError(
-            'Rates arrays must be \
-            sorted and equal by time'
-          )
+          throw new TypeError('Rates arrays must be sorted and equal by time')
         }
 
         dayRate[currency] = values[index].value
@@ -267,7 +263,7 @@ export const pingRates = () => (dispatch, getState) => {
     const period = selectPeriod(getState())
 
     let nextTimeout = convertPeriodToSeconds(period) * 1000
-    if (typeof currentTimer === 'undefined') {
+    if (typeof currentTimerId === 'undefined') {
       // sync with most recent server updates
       const lastServerUpdateInMsc = dayjs(
         lastServerUpdate, TIME_FORMAT

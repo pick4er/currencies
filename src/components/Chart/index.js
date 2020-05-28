@@ -71,7 +71,6 @@ function Chart(props) {
   }, [
     rates,
     base,
-    chartRoot.current,
     chart,
     setChart,
     setLines,

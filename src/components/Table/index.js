@@ -1,13 +1,22 @@
 import React from 'react';
 import T from 'prop-types';
+import dayjs from 'dayjs';
+import cx from 'classnames';
 import { connect } from 'react-redux';
+import { FixedSizeList as List } from 'react-window';
 
 import {
   selectCurrencies,
   selectBaseCurrency,
   selectRatesByTime,
 } from 'flux/modules/currencies';
-import { createCurrencyPair } from 'helpers';
+import {
+  TIME_FORMAT,
+  CHART_TIME_FORMAT,
+  createCurrencyPair,
+} from 'helpers';
+
+import css from './index.module.scss';
 
 function Table(props) {
   const {
@@ -17,32 +26,47 @@ function Table(props) {
   } = props
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <td>Time (UTC+0)</td>
+    <div className={css.table}>
+      <div className={cx([css.header, css.row])}>
+        <div>Time (UTC+3)</div>
 
-          {currencies.map(currency => (
-            <td key={currency}>
-              {createCurrencyPair(base, currency)}
-            </td>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rates.map(({ time, ...prices }) => (
-          <tr key={time}>
-            <td>{ time }</td>
-
-            {currencies.map(currency => (
-              <td key={time + currency}>
-                { prices[currency] }
-              </td>
-            ))}
-          </tr>
+        {currencies.map(currency => (
+          <div key={currency}>
+            {createCurrencyPair(currency, base)}
+          </div>
         ))}
-      </tbody>
-    </table>
+      </div>
+      <List
+        width={416}
+        height={500}
+        itemSize={35}
+        itemCount={rates.length}
+        className={css.body}
+      >
+        {({ index, style }) => {
+          const { time, ...prices } = rates[index]
+
+          return (
+            <div
+              key={time}
+              style={style}
+              className={css.row}
+            >
+              <div>{ 
+                dayjs(time, TIME_FORMAT)
+                  .format(CHART_TIME_FORMAT)
+              }</div>
+
+              {currencies.map(currency => (
+                <div key={time + currency}>
+                  { prices[currency] }
+                </div>
+              ))}
+            </div>
+          )
+        }}
+      </List>
+    </div>
   )
 }
 
