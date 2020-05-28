@@ -9,8 +9,8 @@ import {
 const secondsInPeriod = convertPeriodToSeconds('1m')
 let last_changed = dayjs().format(TIME_FORMAT)
 const rates = {
-  usd: undefined,
-  eur: undefined,
+  usd: getRandomRate('usd'),
+  eur: getRandomRate('eur'),
 }
 
 async function updateRates(ctx, next) {
@@ -20,16 +20,19 @@ async function updateRates(ctx, next) {
     (timestamp - lastTimestamp) / secondsInPeriod,
     10
   )
-  last_changed = dayjs.unix(
+  const next_last_changed = dayjs.unix(
     lastTimestamp + periodsPassed * secondsInPeriod
   ).format(TIME_FORMAT)
-  ctx.last_changed = last_changed
 
-  ctx.rates = {}
-  Object.keys(rates).forEach(currency => {
-    rates[currency] = getRandomRate(currency)
-    ctx.rates[currency] = rates[currency]
-  })
+  if (last_changed !== next_last_changed) {
+    // update rates
+    Object.keys(rates).forEach(currency => {
+      rates[currency] = getRandomRate(currency)
+    })
+  }
+
+  ctx.rates = { ...rates };
+  ctx.last_changed = last_changed = next_last_changed;
 
   await next()
 }
