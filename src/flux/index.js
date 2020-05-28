@@ -5,10 +5,15 @@ import {
   applyMiddleware,
 } from 'redux';
 
+import notifications from 'flux/modules/notifications';
 import currencies from 'flux/modules/currencies';
 import dashboard from 'flux/modules/dashboard';
 
 export default createStore(
-  combineReducers({ currencies, dashboard, }),
+  combineReducers({
+    currencies,
+    dashboard,
+    notifications,
+  }),
   applyMiddleware(thunk),
 );

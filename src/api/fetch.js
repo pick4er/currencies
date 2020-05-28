@@ -34,7 +34,6 @@ export default function api(url, props) {
   const fullUrl = getFullUrl(url, isFullUrl, query);
   const options = getOptions();
 
-  debugger
   return fetch(fullUrl, options)
     .then(res => {
       return res

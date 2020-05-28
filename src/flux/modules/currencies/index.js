@@ -2,7 +2,11 @@ import dayjs from 'dayjs';
 import { createSelector } from 'reselect';
 import { getHistoryRates } from 'api';
 
-import { createCurrencyPair } from 'helpers';
+import { notify } from 'flux/modules/notifications';
+import {
+  createCurrencyPair,
+  sanitizeHistoryData,
+} from 'helpers';
 
 const Periods = {
   day: '1d',
@@ -114,7 +118,7 @@ async (dispatch, getState) => {
   const timeFrom = dayjs('2020-05-20').format('YYYY-MM-DDTHH:mm:ss')
   const timeTo = dayjs().format('YYYY-MM-DDTHH:mm:ss')
 
-  const values = await Promise.all(
+  await Promise.all(
     currencies.map(async currency => {
       const result = await getHistoryRates({
         symbol: createCurrencyPair(currency, base),
@@ -123,7 +127,14 @@ async (dispatch, getState) => {
         to: timeTo,
       })
 
-      rates.set(currency, result)
+      if (result?.code !== '200') {
+        dispatch(notify(result.code))
+      } else {
+        rates.set(
+          currency,
+          sanitizeHistoryData(result.response)
+        )
+      }
     })
   )
 }
