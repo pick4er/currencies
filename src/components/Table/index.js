@@ -51,10 +51,7 @@ Table.propTypes = {
     timestamp: T.string.isRequired,
     // currencies: string
   })),
-  currencies: T.shape({
-    entries: T.func.isRequired,
-    values: T.func.isRequired,
-  }).isRequired,
+  currencies: T.arrayOf(T.string).isRequired,
   base: T.string.isRequired,
 }
 

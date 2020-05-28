@@ -16,7 +16,9 @@ function getHistory(ctx) {
 
   const fromUnix = getUnix(fromTime)
   const toUnix = getUnix(toTime)
-  const secondsInPeriod = convertPeriodToSeconds(period)
+  const secondsInPeriod = convertPeriodToSeconds(
+    period.toLowerCase()
+  )
   const periodsAmount = parseInt(
     (toUnix - fromUnix) / secondsInPeriod,
     10

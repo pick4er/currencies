@@ -3,10 +3,7 @@ import { createSelector } from 'reselect';
 import { getHistoryRates } from 'api';
 
 import { notify } from 'flux/modules/notifications';
-import {
-  createCurrencyPair,
-  sanitizeHistoryData,
-} from 'helpers';
+import { createCurrencyPair } from 'helpers';
 
 const Periods = {
   day: '1d',
@@ -21,8 +18,8 @@ const SET_CURRENCIES = 'CURRENCIES/SET_CURRENCIES';
 const SET_RATES = 'CURRENCIES/SET_RATES';
 
 const initialState = {
-  base: undefined,
-  currencies: undefined,
+  base: 'RUB',
+  currencies: ['USD', 'EUR'],
   rates: undefined,
 }
 
@@ -106,12 +103,6 @@ export const setRate = payload => ({
 })
 
 // Middleware
-export const initDashboard = () => dispatch => {
-  dispatch(setBaseCurrency('RUB'))
-  dispatch(setCurrencies(['USD', 'EUR']))
-  dispatch(initRates())
-}
-
 export const initRates = () =>
 async (dispatch, getState) => {
   const base = selectBaseCurrency(getState())
@@ -123,20 +114,14 @@ async (dispatch, getState) => {
   await Promise.all(
     currencies.map(async currency => {
       const result = await getHistoryRates({
-        symbol: createCurrencyPair(currency, base),
+        base,
+        currency,
         period: Periods.fiveMinutes,
         from: timeFrom,
         to: timeTo,
       })
 
-      if (result?.code !== '200') {
-        dispatch(notify(result.code))
-      } else {
-        rates.set(
-          currency,
-          sanitizeHistoryData(result.response)
-        )
-      }
+      rates.set(currency, result)
     })
   )
 }
