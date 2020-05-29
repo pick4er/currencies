@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import T from 'prop-types'
 import { connect } from 'react-redux'
-import dayjs from 'dayjs'
 import { createChart } from 'lightweight-charts'
 
 import {
@@ -10,6 +9,7 @@ import {
   selectRatesByCurrencies,
 } from 'flux/modules/currencies'
 import {
+  dayjs,
   CHART_TIME_FORMAT,
   createCurrencyPair,
 } from 'helpers'

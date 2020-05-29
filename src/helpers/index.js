@@ -1,7 +1,14 @@
 import createCurrencyPair from './createCurrencyPair'
+import dayjs, {
+  TIME_FORMAT,
+  CHART_TIME_FORMAT,
+} from './dayjs'
 import convertPeriodToSeconds from './convertPeriodToSeconds'
 
-export const TIME_FORMAT = 'YYYY-MM-DDTHH:mm'
-export const CHART_TIME_FORMAT = 'DD.MM.YY HH:mm'
-
-export { createCurrencyPair, convertPeriodToSeconds }
+export {
+  createCurrencyPair,
+  convertPeriodToSeconds,
+  dayjs,
+  TIME_FORMAT,
+  CHART_TIME_FORMAT,
+}

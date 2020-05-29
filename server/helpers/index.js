@@ -1,9 +1,9 @@
+import dayjs, { TIME_FORMAT } from './dayjs'
 import getRandomRate from './getRandomRate'
-import getUnix, { TIME_FORMAT } from './getUnix'
 import convertPeriodToSeconds from './convertPeriodToSeconds'
 
 export {
-  getUnix,
+  dayjs,
   TIME_FORMAT,
   getRandomRate,
   convertPeriodToSeconds,
