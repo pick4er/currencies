@@ -1,2 +1,1 @@
-
-export default (currency, base) => `${currency}/${base}`;
+export default (currency, base) => `${currency}/${base}`

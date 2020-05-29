@@ -1,4 +1,3 @@
-
 const periodToSeconds = {
   '1m': 60,
   '5m': 300,
@@ -6,4 +5,4 @@ const periodToSeconds = {
   '1d': 86400,
 }
 
-export default period => periodToSeconds[period]
+export default (period) => periodToSeconds[period]

@@ -6,5 +6,5 @@ export {
   getUnix,
   TIME_FORMAT,
   getRandomRate,
-  convertPeriodToSeconds
+  convertPeriodToSeconds,
 }

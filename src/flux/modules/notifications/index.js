@@ -1,16 +1,15 @@
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect'
 
 export const Notifications = {
   PerMinuteLimit: '213',
   AccountBlocked: '103',
-  PerMonthLimit: '211'
+  PerMonthLimit: '211',
 }
 
 // Actions
-const SET_NOTIFICATION =
-  'DASHBOARD/SET_NOTIFICATION';
+const SET_NOTIFICATION = 'DASHBOARD/SET_NOTIFICATION'
 const SET_NOTIFICATION_TIMER =
-  'DASHBOARD/SET_NOTIFICATION_TIMER';
+  'DASHBOARD/SET_NOTIFICATION_TIMER'
 
 const initialState = {
   notification: undefined,
@@ -25,21 +24,21 @@ export default function reducer(
     case SET_NOTIFICATION:
       return {
         ...state,
-        notification: payload
-      };
+        notification: payload,
+      }
     case SET_NOTIFICATION_TIMER:
       return {
         ...state,
         notificationTimer: payload,
-      };
+      }
     default:
-      return state;
+      return state
   }
 }
 
 // Selectors
-const selectNotificationsModule = state =>
-  state.notifications;
+const selectNotificationsModule = (state) =>
+  state.notifications
 
 export const selectNotification = createSelector(
   selectNotificationsModule,
@@ -52,18 +51,18 @@ export const selectNotificationTimer = createSelector(
 )
 
 // Action creators
-export const setNotification = payload => ({
+export const setNotification = (payload) => ({
   type: SET_NOTIFICATION,
-  payload
+  payload,
 })
 
-export const setNotificationTimer = payload => ({
+export const setNotificationTimer = (payload) => ({
   type: SET_NOTIFICATION_TIMER,
-  payload
+  payload,
 })
 
 // Middleware
-export const notify = code => (dispatch, getState) => {
+export const notify = (code) => (dispatch, getState) => {
   if (code === '213') {
     dispatch(setNotification(Notifications.PerMinuteLimit))
   } else if (code === '103') {

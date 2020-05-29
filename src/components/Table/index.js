@@ -1,36 +1,32 @@
-import React from 'react';
-import T from 'prop-types';
-import dayjs from 'dayjs';
-import cx from 'classnames';
-import { connect } from 'react-redux';
-import { FixedSizeList as List } from 'react-window';
+import React from 'react'
+import T from 'prop-types'
+import dayjs from 'dayjs'
+import cx from 'classnames'
+import { connect } from 'react-redux'
+import { FixedSizeList as List } from 'react-window'
 
 import {
   selectCurrencies,
   selectBaseCurrency,
   selectRatesByTime,
-} from 'flux/modules/currencies';
+} from 'flux/modules/currencies'
 import {
   TIME_FORMAT,
   CHART_TIME_FORMAT,
   createCurrencyPair,
-} from 'helpers';
+} from 'helpers'
 
-import css from './index.module.scss';
+import css from './index.module.scss'
 
 function Table(props) {
-  const {
-    base,
-    rates,
-    currencies,
-  } = props
+  const { base, rates, currencies } = props
 
   return (
     <div className={css.table}>
       <div className={cx([css.header, css.row])}>
         <div>Time (UTC+3)</div>
 
-        {currencies.map(currency => (
+        {currencies.map((currency) => (
           <div key={currency}>
             {createCurrencyPair(currency, base)}
           </div>
@@ -52,14 +48,15 @@ function Table(props) {
               style={style}
               className={css.row}
             >
-              <div>{ 
-                dayjs(time, TIME_FORMAT)
-                  .format(CHART_TIME_FORMAT)
-              }</div>
+              <div>
+                {dayjs(time, TIME_FORMAT).format(
+                  CHART_TIME_FORMAT
+                )}
+              </div>
 
-              {currencies.map(currency => (
+              {currencies.map((currency) => (
                 <div key={time + currency}>
-                  { prices[currency] }
+                  {prices[currency]}
                 </div>
               ))}
             </div>
@@ -71,18 +68,20 @@ function Table(props) {
 }
 
 Table.propTypes = {
-  rates: T.arrayOf(T.shape({
-    time: T.string.isRequired,
-    // currencies: string
-  })),
+  rates: T.arrayOf(
+    T.shape({
+      time: T.string.isRequired,
+      // currencies: string
+    })
+  ).isRequired,
   currencies: T.arrayOf(T.string).isRequired,
   base: T.string.isRequired,
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   rates: selectRatesByTime(state),
   currencies: selectCurrencies(state),
-  base: selectBaseCurrency(state)
+  base: selectBaseCurrency(state),
 })
 
-export default connect(mapStateToProps)(Table);
+export default connect(mapStateToProps)(Table)

@@ -1,25 +1,21 @@
-import React, { useEffect } from 'react';
-import T from 'prop-types';
-import { connect } from 'react-redux';
+import React, { useEffect } from 'react'
+import T from 'prop-types'
+import { connect } from 'react-redux'
 
-import Table from 'components/Table';
-import Chart from 'components/Chart';
-import ModeSwitcher from 'components/ModeSwitcher';
+import Table from 'components/Table'
+import Chart from 'components/Chart'
+import ModeSwitcher from 'components/ModeSwitcher'
 
-import { Modes, selectMode } from 'flux/modules/dashboard';
+import { Modes, selectMode } from 'flux/modules/dashboard'
 import {
   initRates as initRatesAction,
-  pingRates as pingRatesAction
-} from 'flux/modules/currencies';
+  pingRates as pingRatesAction,
+} from 'flux/modules/currencies'
 
-import css from './index.module.scss';
+import css from './index.module.scss'
 
 function Dashboard(props) {
-  const {
-    mode,
-    initRates,
-    pingRates,
-  } = props
+  const { mode, initRates, pingRates } = props
 
   useEffect(() => {
     initRates()
@@ -43,13 +39,13 @@ Dashboard.propTypes = {
 
 const mapDispatchToProps = {
   initRates: initRatesAction,
-  pingRates: pingRatesAction
+  pingRates: pingRatesAction,
 }
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   mode: selectMode(state),
 })
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Dashboard);
+)(Dashboard)

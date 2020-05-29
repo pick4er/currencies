@@ -1,26 +1,22 @@
-import React from 'react';
-import T from 'prop-types';
-import cx from 'classnames';
-import { connect } from 'react-redux';
+import React from 'react'
+import T from 'prop-types'
+import cx from 'classnames'
+import { connect } from 'react-redux'
 
 import {
   Modes,
   selectMode,
   setMode as setModeAction,
-} from 'flux/modules/dashboard';
+} from 'flux/modules/dashboard'
 
-import css from './index.module.scss';
+import css from './index.module.scss'
 
 function ModeSwitcher(props) {
-  const {
-    mode,
-    setMode,
-    className,
-  } = props;
+  const { mode, setMode, className } = props
 
   const classNames = cx({
     [css.switcher]: true,
-    [className]: className
+    [className]: className,
   })
 
   return (
@@ -57,14 +53,14 @@ ModeSwitcher.propTypes = {
   mode: T.oneOf(Object.values(Modes)).isRequired,
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   mode: selectMode(state),
 })
 const mapDispatchToProps = {
-  setMode: setModeAction
+  setMode: setModeAction,
 }
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
-)(ModeSwitcher);
+  mapDispatchToProps
+)(ModeSwitcher)
