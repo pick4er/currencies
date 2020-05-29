@@ -1,22 +1,18 @@
-import React, {
-  useRef,
-  useState,
-  useEffect,
-} from 'react';
-import T from 'prop-types';
-import { connect } from 'react-redux';
-import dayjs from 'dayjs';
-import { createChart } from 'lightweight-charts';
+import React, { useRef, useState, useEffect } from 'react'
+import T from 'prop-types'
+import { connect } from 'react-redux'
+import dayjs from 'dayjs'
+import { createChart } from 'lightweight-charts'
 
 import {
   Colors,
   selectBaseCurrency,
   selectRatesByCurrencies,
-} from 'flux/modules/currencies';
+} from 'flux/modules/currencies'
 import {
   CHART_TIME_FORMAT,
   createCurrencyPair,
-} from 'helpers';
+} from 'helpers'
 
 function initChart(rates, base, ref) {
   const chart = createChart(ref, {
@@ -27,12 +23,12 @@ function initChart(rates, base, ref) {
         return dayjs
           .unix(businessDayOrTimestamp)
           .format(CHART_TIME_FORMAT)
-      }
-    }
+      },
+    },
   })
 
   const lines = new Map()
-  for (let [currency, values] of rates) {
+  rates.forEach((values, currency) => {
     const lineSeries = chart.addLineSeries({
       title: createCurrencyPair(currency, base),
       color: Colors[currency.toLowerCase()],
@@ -40,15 +36,15 @@ function initChart(rates, base, ref) {
 
     lineSeries.setData(values)
     lines.set(currency, lineSeries)
-  }
+  })
 
   return { lines, chart }
 }
 
 function updateChart(rates, base, lines) {
-  for (let [currency, line] of lines) {
+  lines.forEach((line, currency) => {
     line.setData(rates.get(currency))
-  }
+  })
 }
 
 function Chart(props) {
@@ -56,33 +52,27 @@ function Chart(props) {
   const [lines, setLines] = useState(null)
   const chartRoot = useRef(null)
 
-  const { rates, base } = props;
+  const { rates, base } = props
 
   useEffect(() => {
     if (!chart) {
       const {
         chart: newChart,
-        lines: newLines
+        lines: newLines,
       } = initChart(rates, base, chartRoot.current)
 
       setChart(newChart)
       setLines(newLines)
     }
-  }, [
-    rates,
-    base,
-    chart,
-    setChart,
-    setLines,
-  ])
+  }, [rates, base, chart, setChart, setLines])
 
   useEffect(() => {
-    ;(lines && updateChart(rates, base, lines))
+    if (lines) {
+      updateChart(rates, base, lines)
+    }
   }, [rates, base, lines])
 
-  return (
-    <div ref={chartRoot} />
-  )
+  return <div ref={chartRoot} />
 }
 
 Chart.propTypes = {
@@ -92,9 +82,9 @@ Chart.propTypes = {
   base: T.string.isRequired,
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   base: selectBaseCurrency(state),
   rates: selectRatesByCurrencies(state),
 })
 
-export default connect(mapStateToProps, null)(Chart);
+export default connect(mapStateToProps)(Chart)

@@ -1,3 +1,3 @@
-import logger from 'koa-logger';
+import logger from 'koa-logger'
 
-export default logger();
+export default logger()

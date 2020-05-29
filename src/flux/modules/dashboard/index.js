@@ -1,4 +1,4 @@
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect'
 
 export const Modes = {
   Table: 'TABLE',
@@ -6,10 +6,10 @@ export const Modes = {
 }
 
 // Actions
-const SET_MODE = 'DASHBOARD/SET_MODE';
+const SET_MODE = 'DASHBOARD/SET_MODE'
 
 const initialState = {
-  mode: Modes.Table
+  mode: Modes.Table,
 }
 
 export default function reducer(
@@ -20,15 +20,15 @@ export default function reducer(
     case SET_MODE:
       return {
         ...state,
-        mode: payload
-      };
+        mode: payload,
+      }
     default:
-      return state;
+      return state
   }
 }
 
 // Selectors
-const selectDashboardModule = state => state.dashboard;
+const selectDashboardModule = (state) => state.dashboard
 
 export const selectMode = createSelector(
   selectDashboardModule,
@@ -36,7 +36,7 @@ export const selectMode = createSelector(
 )
 
 // Action creators
-export const setMode = payload => ({
+export const setMode = (payload) => ({
   type: SET_MODE,
-  payload
+  payload,
 })

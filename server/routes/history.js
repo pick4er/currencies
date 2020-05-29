@@ -1,10 +1,10 @@
-import dayjs from 'dayjs';
+import dayjs from 'dayjs'
 import {
   getUnix,
   TIME_FORMAT,
   getRandomRate,
-  convertPeriodToSeconds
-} from '../helpers';
+  convertPeriodToSeconds,
+} from '../helpers'
 
 function getHistory(ctx) {
   const {
@@ -33,7 +33,7 @@ function getHistory(ctx) {
 
   const rates = []
   for (let i = 1; i <= periodsAmount; i++) {
-    const unixTimestamp = fromUnix + (secondsInPeriod * i)
+    const unixTimestamp = fromUnix + secondsInPeriod * i
     const time = dayjs
       .unix(unixTimestamp)
       .format(TIME_FORMAT)

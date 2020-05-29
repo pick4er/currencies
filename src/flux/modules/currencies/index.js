@@ -1,15 +1,12 @@
-import dayjs from 'dayjs';
-import { createSelector } from 'reselect';
-import {
-  getLatestRates,
-  getHistoryRates,
-} from 'api';
+import dayjs from 'dayjs'
+import { createSelector } from 'reselect'
+import { getLatestRates, getHistoryRates } from 'api'
 
 import {
   TIME_FORMAT,
   createCurrencyPair,
   convertPeriodToSeconds,
-} from 'helpers';
+} from 'helpers'
 
 export const Periods = {
   day: '1d',
@@ -26,11 +23,11 @@ export const Colors = {
 const SERVER_UPDATES_PERIOD = Periods.minute
 
 // Actions
-const SET_BASE = 'CURRENCIES/SET_BASE';
-const SET_CURRENCIES = 'CURRENCIES/SET_CURRENCIES';
-const SET_RATES = 'CURRENCIES/SET_RATES';
-const SET_TIMER_ID = 'CURRENCIES/SET_TIMER_ID';
-const SET_PERIOD = 'CURRENCIES/SET_PERIOD';
+const SET_BASE = 'CURRENCIES/SET_BASE'
+const SET_CURRENCIES = 'CURRENCIES/SET_CURRENCIES'
+const SET_RATES = 'CURRENCIES/SET_RATES'
+const SET_TIMER_ID = 'CURRENCIES/SET_TIMER_ID'
+const SET_PERIOD = 'CURRENCIES/SET_PERIOD'
 
 const initialState = {
   base: 'RUB',
@@ -48,8 +45,8 @@ export default function reducer(
     case SET_BASE:
       return {
         ...state,
-        base: payload
-      };
+        base: payload,
+      }
     case SET_PERIOD:
       return {
         ...state,
@@ -58,17 +55,17 @@ export default function reducer(
     case SET_CURRENCIES:
       return {
         ...state,
-        currencies: payload
+        currencies: payload,
       }
     case SET_RATES:
       return {
         ...state,
-        rates: payload
+        rates: payload,
       }
     case SET_TIMER_ID:
       return {
         ...state,
-        timerId: payload
+        timerId: payload,
       }
     default:
       return state
@@ -76,7 +73,7 @@ export default function reducer(
 }
 
 // Selectors
-const selectCurrenciesModule = state => state.currencies
+const selectCurrenciesModule = (state) => state.currencies
 
 export const selectBaseCurrency = createSelector(
   selectCurrenciesModule,
@@ -85,7 +82,7 @@ export const selectBaseCurrency = createSelector(
 
 export const selectTimerId = createSelector(
   selectCurrenciesModule,
-  ({ timerId }) => timerId,
+  ({ timerId }) => timerId
 )
 
 export const selectRates = createSelector(
@@ -100,14 +97,9 @@ export const selectPeriod = createSelector(
 
 export const selectRatesByCurrencies = createSelector(
   selectRates,
-  rates => {
+  (rates) => {
     const ratesWithUnixTime = new Map()
-    for (
-      const [
-        currency,
-        values,
-      ] of rates.entries()
-    ) {
+    rates.forEach((values, currency) => {
       const valuesWithUnixTime = values.map(
         ({ time, ...rest }) => ({
           ...rest,
@@ -115,37 +107,35 @@ export const selectRatesByCurrencies = createSelector(
         })
       )
       ratesWithUnixTime.set(currency, valuesWithUnixTime)
-    }
+    })
 
     return ratesWithUnixTime
-  },
+  }
 )
 
 export const selectRatesByTime = createSelector(
   selectRates,
-  rates => {
+  (rates) => {
     let ratesByTime = []
-    for (
-      const [
-        currency,
-        values,
-      ] of rates.entries()
-    ) {
+    rates.forEach((values, currency) => {
       if (ratesByTime.length === 0) {
         ratesByTime = ratesByTime.concat(values)
       }
 
       ratesByTime.forEach((dayRate, index) => {
         if (values[index].time !== dayRate.time) {
-          throw new TypeError('Rates arrays must be sorted and equal by time')
+          throw new TypeError(
+            'Rates arrays must be sorted and equal by time'
+          )
         }
 
+        // eslint-disable-next-line no-param-reassign
         dayRate[currency] = values[index].value
       })
-    }
+    })
 
     return ratesByTime.reverse()
-  },
+  }
 )
 
 export const selectCurrencies = createSelector(
@@ -156,54 +146,58 @@ export const selectCurrencies = createSelector(
 export const selectCurrencyPairs = createSelector(
   selectBaseCurrency,
   selectCurrencies,
-  (base, currencies) => currencies.reduce(
-    (acc, curr) => 
-      acc
-        ? `${acc},`
-        : acc
-      + createCurrencyPair(base, curr), ''
-  )
+  (base, currencies) =>
+    currencies.reduce(
+      (acc, curr) =>
+        acc
+          ? `${acc},`
+          : acc + createCurrencyPair(base, curr),
+      ''
+    )
 )
 
 // Action creators
-export const setBaseCurrency = payload => ({
+export const setBaseCurrency = (payload) => ({
   type: SET_BASE,
-  payload
+  payload,
 })
 
-export const setCurrencies = payload => ({
+export const setCurrencies = (payload) => ({
   type: SET_CURRENCIES,
-  payload
+  payload,
 })
 
-export const setRates = payload => ({
+export const setRates = (payload) => ({
   type: SET_RATES,
-  payload
+  payload,
 })
 
-export const setTimerId = payload => ({
+export const setTimerId = (payload) => ({
   type: SET_TIMER_ID,
   payload,
 })
 
-export const setPeriod = payload => ({
+export const setPeriod = (payload) => ({
   type: SET_PERIOD,
   payload,
 })
 
 // Middleware
-export const initRates = () =>
-async (dispatch, getState) => {
+export const initRates = () => async (
+  dispatch,
+  getState
+) => {
   const base = selectBaseCurrency(getState())
   const period = selectPeriod(getState())
   const currencies = selectCurrencies(getState())
   const rates = new Map()
   const timeTo = dayjs().format(TIME_FORMAT)
-  const timeFrom =
-    dayjs().subtract(1, 'day').format(TIME_FORMAT)
+  const timeFrom = dayjs()
+    .subtract(1, 'day')
+    .format(TIME_FORMAT)
 
   await Promise.all(
-    currencies.map(async currency => {
+    currencies.map(async (currency) => {
       const result = await getHistoryRates({
         base,
         period,
@@ -215,7 +209,7 @@ async (dispatch, getState) => {
       rates.set(currency, result)
     })
   )
-  
+
   dispatch(setRates(rates))
 }
 
@@ -225,11 +219,11 @@ export const pingRates = () => (dispatch, getState) => {
 
   setTimeout(async function ping() {
     const nextRates = new Map()
-    let lastServerUpdate = undefined
+    let lastServerUpdate
     const ratesUpdate = {}
 
     await Promise.all(
-      currencies.map(async currency => {
+      currencies.map(async (currency) => {
         const result = await getLatestRates({
           base,
           currency,
@@ -241,21 +235,16 @@ export const pingRates = () => (dispatch, getState) => {
     )
 
     const rates = selectRates(getState())
-    for (
-      const [
-        currency,
-        values,
-      ] of rates.entries()
-    ) {
+    rates.forEach((values, currency) => {
       const nextRate = ratesUpdate[currency]
       const nextValues = JSON.parse(JSON.stringify(values))
       nextValues.push({
         time: nextRate.last_changed,
-        value: nextRate.value
+        value: nextRate.value,
       })
 
       nextRates.set(currency, nextValues)
-    }
+    })
 
     dispatch(setRates(nextRates))
 
@@ -265,18 +254,18 @@ export const pingRates = () => (dispatch, getState) => {
     let nextTimeout = convertPeriodToSeconds(period) * 1000
     if (typeof currentTimerId === 'undefined') {
       // sync with most recent server updates
-      const lastServerUpdateInMsc = dayjs(
-        lastServerUpdate, TIME_FORMAT
-      ).unix() * 1000
-      const nextServerUpdateInMsc = dayjs(
-        lastServerUpdate, TIME_FORMAT
-      ).add(
-        convertPeriodToSeconds(SERVER_UPDATES_PERIOD), 's'
-      ).unix() * 1000
+      const lastServerUpdateInMsc =
+        dayjs(lastServerUpdate, TIME_FORMAT).unix() * 1000
+      const nextServerUpdateInMsc =
+        dayjs(lastServerUpdate, TIME_FORMAT)
+          .add(
+            convertPeriodToSeconds(SERVER_UPDATES_PERIOD),
+            's'
+          )
+          .unix() * 1000
 
-      nextTimeout = 
-        nextServerUpdateInMsc -
-        lastServerUpdateInMsc
+      nextTimeout =
+        nextServerUpdateInMsc - lastServerUpdateInMsc
     }
 
     dispatch(setTimerId(setTimeout(ping, nextTimeout)))
