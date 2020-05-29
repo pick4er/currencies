@@ -5,7 +5,6 @@ import {
   getHistoryRates,
 } from 'api';
 
-import { notify } from 'flux/modules/notifications';
 import {
   TIME_FORMAT,
   createCurrencyPair,
@@ -138,10 +137,7 @@ export const selectRatesByTime = createSelector(
 
       ratesByTime.forEach((dayRate, index) => {
         if (values[index].time !== dayRate.time) {
-          throw new TypeError(
-            'Rates arrays must be \
-            sorted and equal by time'
-          )
+          throw new TypeError('Rates arrays must be sorted and equal by time')
         }
 
         dayRate[currency] = values[index].value
@@ -266,9 +262,8 @@ export const pingRates = () => (dispatch, getState) => {
     const currentTimerId = selectTimerId(getState())
     const period = selectPeriod(getState())
 
-    console.log(`--> [${currentTimerId}] lastServerUpdate: ${lastServerUpdate}`)
-    let nextTimeout = convertPeriodToSeconds('1m') * 1000
-    if (typeof currentTimer === 'undefined') {
+    let nextTimeout = convertPeriodToSeconds(period) * 1000
+    if (typeof currentTimerId === 'undefined') {
       // sync with most recent server updates
       const lastServerUpdateInMsc = dayjs(
         lastServerUpdate, TIME_FORMAT
@@ -279,12 +274,11 @@ export const pingRates = () => (dispatch, getState) => {
         convertPeriodToSeconds(SERVER_UPDATES_PERIOD), 's'
       ).unix() * 1000
 
-      console.log(`--> [${currentTimerId}] lastServerUpdateInMsc: ${lastServerUpdateInMsc}`)
-      console.log(`--> [${currentTimerId}] nextServerUpdateInMsc: ${nextServerUpdateInMsc}`)
-      nextTimeout = nextServerUpdateInMsc - lastServerUpdateInMsc
+      nextTimeout = 
+        nextServerUpdateInMsc -
+        lastServerUpdateInMsc
     }
 
-    console.log(`--> [${currentTimerId}] nextTimeout: ${nextTimeout}`)
     dispatch(setTimerId(setTimeout(ping, nextTimeout)))
   }, 0)
 }

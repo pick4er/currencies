@@ -1,3 +1,3 @@
 import serve from 'koa-static';
 
-export default serve('public');
+export default serve('build');

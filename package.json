@@ -19,6 +19,7 @@
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
     "react-scripts": "3.4.1",
+    "react-window": "^1.8.5",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "reselect": "^4.0.0"
@@ -28,10 +29,11 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "clear": "rm -rf ./build/* && rm -rf ./lib/*",
+    "clear": "rm -rf ./lib/*",
     "build-server": "babel server -d lib",
     "start-server": "node ./lib/index.js",
-    "serve": "yarn clear && yarn build-server && yarn start-server"
+    "serve": "yarn clear && yarn build-server && yarn start-server",
+    "heroku-postbuild": "yarn build-server && yarn build"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -27,8 +27,8 @@ function Dashboard(props) {
   }, [initRates, pingRates])
 
   return (
-    <div>
-      <ModeSwitcher />
+    <div className={css.dashboard}>
+      <ModeSwitcher className={css.switcher} />
       {mode === Modes.Table && <Table />}
       {mode === Modes.Chart && <Chart />}
     </div>

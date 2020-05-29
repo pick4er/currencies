@@ -3,7 +3,6 @@ import Router from 'koa-router';
 
 import history from './routes/history';
 import latest from './routes/latest';
-import front from './routes/front';
 import assets from './routes/assets';
 
 import helmet from './handlers/helmet';
@@ -30,8 +29,7 @@ app.use(filename);
 router
   .get('/history', history)
   .get('/latest', latest)
-  .get('/assets', assets)
-  .get('*', front)
+  .get('/static', assets)
 
 app.use(router.routes());
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import T from 'prop-types';
+import cx from 'classnames';
 import { connect } from 'react-redux';
 
 import {
@@ -11,10 +12,19 @@ import {
 import css from './index.module.scss';
 
 function ModeSwitcher(props) {
-  const { mode, setMode } = props;
+  const {
+    mode,
+    setMode,
+    className,
+  } = props;
+
+  const classNames = cx({
+    [css.switcher]: true,
+    [className]: className
+  })
 
   return (
-    <ul>
+    <ul className={classNames}>
       <li>
         <button
           type="button"
@@ -37,7 +47,12 @@ function ModeSwitcher(props) {
   )
 }
 
+ModeSwitcher.defaultProps = {
+  className: '',
+}
+
 ModeSwitcher.propTypes = {
+  className: T.string,
   setMode: T.func.isRequired,
   mode: T.oneOf(Object.values(Modes)).isRequired,
 }
