@@ -1,6 +1,5 @@
-import dayjs from 'dayjs'
 import {
-  getUnix,
+  dayjs,
   TIME_FORMAT,
   getRandomRate,
   convertPeriodToSeconds,
@@ -14,8 +13,8 @@ function getHistory(ctx) {
     from: fromTime,
   } = ctx.query
 
-  const fromUnix = getUnix(fromTime)
-  const toUnix = getUnix(toTime)
+  const fromUnix = dayjs.utc(fromTime, TIME_FORMAT).unix()
+  const toUnix = dayjs.utc(toTime, TIME_FORMAT).unix()
   const secondsInPeriod = convertPeriodToSeconds(
     period.toLowerCase()
   )
@@ -35,7 +34,7 @@ function getHistory(ctx) {
   for (let i = 1; i <= periodsAmount; i++) {
     const unixTimestamp = fromUnix + secondsInPeriod * i
     const time = dayjs
-      .unix(unixTimestamp)
+      .utc(dayjs.unix(unixTimestamp))
       .format(TIME_FORMAT)
     const value = getRandomRate(currency.toLowerCase())
 

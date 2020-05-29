@@ -1,30 +1,35 @@
-import dayjs from 'dayjs'
 import {
-  getUnix,
+  dayjs,
   TIME_FORMAT,
   getRandomRate,
   convertPeriodToSeconds,
 } from '../helpers'
 
 const secondsInPeriod = convertPeriodToSeconds('1m')
-let last_changed = dayjs().format(TIME_FORMAT)
+let lastChanged = dayjs.utc().format(TIME_FORMAT)
 const rates = {
   usd: getRandomRate('usd'),
   eur: getRandomRate('eur'),
 }
 
 async function updateRates(ctx, next) {
-  const timestamp = dayjs().unix()
-  const lastTimestamp = getUnix(last_changed)
+  const timestamp = dayjs.utc().unix()
+  const lastTimestamp = dayjs
+    .utc(lastChanged, TIME_FORMAT)
+    .unix()
   const periodsPassed = parseInt(
     (timestamp - lastTimestamp) / secondsInPeriod,
     10
   )
-  const next_last_changed = dayjs
-    .unix(lastTimestamp + periodsPassed * secondsInPeriod)
+  const nextLastChanged = dayjs
+    .utc(
+      dayjs.unix(
+        lastTimestamp + periodsPassed * secondsInPeriod
+      )
+    )
     .format(TIME_FORMAT)
 
-  if (last_changed !== next_last_changed) {
+  if (lastChanged !== nextLastChanged) {
     // update rates
     Object.keys(rates).forEach((currency) => {
       rates[currency] = getRandomRate(currency)
@@ -32,8 +37,8 @@ async function updateRates(ctx, next) {
   }
 
   ctx.rates = { ...rates }
-  last_changed = next_last_changed
-  ctx.last_changed = last_changed
+  lastChanged = nextLastChanged
+  ctx.lastChanged = lastChanged
 
   await next()
 }

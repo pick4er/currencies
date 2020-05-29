@@ -1,8 +1,8 @@
-import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
 import { getLatestRates, getHistoryRates } from 'api'
 
 import {
+  dayjs,
   TIME_FORMAT,
   createCurrencyPair,
   convertPeriodToSeconds,
@@ -103,7 +103,7 @@ export const selectRatesByCurrencies = createSelector(
       const valuesWithUnixTime = values.map(
         ({ time, ...rest }) => ({
           ...rest,
-          time: dayjs(time, TIME_FORMAT).unix(),
+          time: dayjs.utc(time, TIME_FORMAT).local().unix(),
         })
       )
       ratesWithUnixTime.set(currency, valuesWithUnixTime)
@@ -191,8 +191,9 @@ export const initRates = () => async (
   const period = selectPeriod(getState())
   const currencies = selectCurrencies(getState())
   const rates = new Map()
-  const timeTo = dayjs().format(TIME_FORMAT)
-  const timeFrom = dayjs()
+  const timeTo = dayjs.utc().format(TIME_FORMAT)
+  const timeFrom = dayjs
+    .utc()
     .subtract(1, 'day')
     .format(TIME_FORMAT)
 
@@ -229,7 +230,7 @@ export const pingRates = () => (dispatch, getState) => {
           currency,
         })
 
-        lastServerUpdate = result.last_changed
+        lastServerUpdate = result.lastChanged
         ratesUpdate[currency] = result
       })
     )
@@ -239,7 +240,7 @@ export const pingRates = () => (dispatch, getState) => {
       const nextRate = ratesUpdate[currency]
       const nextValues = JSON.parse(JSON.stringify(values))
       nextValues.push({
-        time: nextRate.last_changed,
+        time: nextRate.lastChanged,
         value: nextRate.value,
       })
 

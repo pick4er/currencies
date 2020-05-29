@@ -1,6 +1,5 @@
 import React from 'react'
 import T from 'prop-types'
-import dayjs from 'dayjs'
 import cx from 'classnames'
 import { connect } from 'react-redux'
 import { FixedSizeList as List } from 'react-window'
@@ -11,6 +10,7 @@ import {
   selectRatesByTime,
 } from 'flux/modules/currencies'
 import {
+  dayjs,
   TIME_FORMAT,
   CHART_TIME_FORMAT,
   createCurrencyPair,
@@ -49,9 +49,10 @@ function Table(props) {
               className={css.row}
             >
               <div>
-                {dayjs(time, TIME_FORMAT).format(
-                  CHART_TIME_FORMAT
-                )}
+                {dayjs
+                  .utc(time, TIME_FORMAT)
+                  .local()
+                  .format(CHART_TIME_FORMAT)}
               </div>
 
               {currencies.map((currency) => (
